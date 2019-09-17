@@ -1,6 +1,6 @@
 English | [简体中文](README-CN.md)
 
-# Alibaba Cloud Rpc Client for Go
+# Alibaba Cloud RPC Client for Go
 [![Latest Stable Version](https://badge.fury.io/gh/aliyun%2Frpc-client-go.svg)](https://badge.fury.io/gh/aliyun%2Frpc-client-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/aliyun/rpc-client-go)](https://goreportcard.com/report/github.com/aliyun/rpc-client-go)
 [![codecov](https://codecov.io/gh/aliyun/rpc-client-go/branch/master/graph/badge.svg)](https://codecov.io/gh/aliyun/rpc-client-go)
@@ -9,15 +9,15 @@ English | [简体中文](README-CN.md)
 
 ![](https://aliyunsdk-pages.alicdn.com/icons/AlibabaCloud.svg)
 
-Alibaba Cloud Rpc Client for Go a tool for Go developers to manage client.
+Alibaba Cloud RPC Client for Go a tool for Go developers to manage client.
 
-This document introduces how to obtain and use Alibaba Cloud Rpc Client for Go.
+This document introduces how to obtain and use Alibaba Cloud RPC Client for Go.
 
 ## Requirements
 - It's necessary for you to make sure your system have installed a Go environment which is new than 1.10.x.
 
 ## Installation
-Use `go get` to install SDK：
+Use `go get` to install:
 
 ```sh
 $ go get -u github.com/aliyun/rpc-client-go
