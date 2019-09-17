@@ -14,7 +14,7 @@ import (
 
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/credentials-go/credentials"
-	"github.com/aliyun/rpc-client/utils"
+	"github.com/aliyun/rpc-client-go/utils"
 )
 
 // client is for calling oss api
@@ -31,10 +31,10 @@ type Client struct {
 	NoProxy        string `json:"NoProxy" xml:"NoProxy"`
 	LocalAddr      string `json:"LocalAddr" xml:"LocalAddr"`
 	MaxIdleConns   int    `json:"MaxIdleConns" xml:"MaxIdleConns"`
+	credential     credentials.Credential
 }
 
 var defaultUserAgent = fmt.Sprintf("AlibabaCloud (%s; %s) Golang/%s Core/%s", runtime.GOOS, runtime.GOARCH, strings.Trim(runtime.Version(), "go"), "0.01")
-var credential credentials.Credential
 
 func (client *Client) InitWithConfig(config map[string]string) (err error) {
 	client.RegionId = config["regionId"]
@@ -48,7 +48,7 @@ func (client *Client) InitWithConfig(config map[string]string) (err error) {
 	if conf.Type == "" {
 		conf.Type = "access_key"
 	}
-	credential, err = credentials.NewCredential(conf)
+	client.credential, err = credentials.NewCredential(conf)
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,10 @@ func (client *Client) GetEndpoint(product string, regionid string) string {
 }
 
 func (client *Client) GetAccessKeyId() string {
-	accesskey, err := credential.GetAccessKeyID()
+	if client.credential == nil {
+		return ""
+	}
+	accesskey, err := client.credential.GetAccessKeyID()
 	if err != nil {
 		return ""
 	}
@@ -159,7 +162,10 @@ func (client *Client) GetAccessKeyId() string {
 }
 
 func (client *Client) GetAccessKeySecret() string {
-	accesssecret, err := credential.GetAccessSecret()
+	if client.credential == nil {
+		return ""
+	}
+	accesssecret, err := client.credential.GetAccessSecret()
 	if err != nil {
 		return ""
 	}

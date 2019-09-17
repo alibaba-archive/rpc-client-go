@@ -15,11 +15,8 @@ func Test_InitWithConfig(t *testing.T) {
 		"accessKeyId": "accessKeyId",
 	}
 	client := new(Client)
-	originCredential := credential
 	err := client.InitWithConfig(config)
-	defer func() {
-		credential = originCredential
-	}()
+
 	assert.Equal(t, "AccessKeySecret cannot be empty", err.Error())
 
 	config["accessKeySecret"] = "accessKeySecret"
