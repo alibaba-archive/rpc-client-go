@@ -1,7 +1,6 @@
-package rpcclient
+package service
 
 import (
-	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
 )
@@ -25,7 +24,6 @@ func Test_flatRepeatedList(t *testing.T) {
 	result := make(map[string]string)
 	for key, value := range filter {
 		filterValue := reflect.ValueOf(value)
-		err := flatRepeatedList(filterValue, result, key)
-		assert.Nil(t, err)
+		flatRepeatedList(filterValue, result, key)
 	}
 }
