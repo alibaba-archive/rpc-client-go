@@ -1,4 +1,4 @@
-package rpcclient
+package service
 
 import (
 	"io/ioutil"
@@ -11,16 +11,16 @@ import (
 )
 
 func Test_InitWithConfig(t *testing.T) {
-	config := map[string]string{
+	config := map[string]interface{}{
 		"accessKeyId": "accessKeyId",
 	}
-	client := new(Client)
-	err := client.InitWithConfig(config)
+	client := new(BaseClient)
+	err := client.InitClient(config)
 
 	assert.Equal(t, "AccessKeySecret cannot be empty", err.Error())
 
 	config["accessKeySecret"] = "accessKeySecret"
-	err = client.InitWithConfig(config)
+	err = client.InitClient(config)
 	assert.Nil(t, err)
 
 	accessKeyId := client.GetAccessKeyId()
@@ -30,32 +30,22 @@ func Test_InitWithConfig(t *testing.T) {
 	assert.Equal(t, "accessKeySecret", accessKeySecret)
 }
 
-func Test_GetUserAgent(t *testing.T) {
-	client := new(Client)
-	useragent := client.GetUserAgent("")
-	assert.Equal(t, "AlibabaCloud (darwin; amd64) Golang/1.11.4 Core/0.01", useragent)
-
-	useragent = client.GetUserAgent("test")
-	assert.Equal(t, "AlibabaCloud (darwin; amd64) Golang/1.11.4 Core/0.01 test", useragent)
+func Test_UserAgent(t *testing.T) {
+	client := new(BaseClient)
+	assert.Contains(t, client.GetUserAgent(""), "AlibabaCloud")
 }
 
 func Test_GetSignature(t *testing.T) {
 	req := tea.NewRequest()
 	req.Query["test"] = "ok"
 
-	client := new(Client)
+	client := new(BaseClient)
 	sign := client.GetSignature(req, "accessKeySecret")
 	assert.Equal(t, "jHx/oHoHNrbVfhncHEvPdHXZwHU=", sign)
 }
 
-func Test_Validator(t *testing.T) {
-	client := new(Client)
-	err := client.Validator(nil)
-	assert.Nil(t, err)
-}
-
 func Test_DefaultNumber(t *testing.T) {
-	client := new(Client)
+	client := new(BaseClient)
 	num := client.DefaultNumber(nil, 1)
 	assert.Equal(t, 1, num)
 
@@ -64,7 +54,7 @@ func Test_DefaultNumber(t *testing.T) {
 }
 
 func Test_Query(t *testing.T) {
-	client := new(Client)
+	client := new(BaseClient)
 	filter := map[string]interface{}{
 		"client": "test",
 	}
@@ -74,21 +64,21 @@ func Test_Query(t *testing.T) {
 }
 
 func Test_GetTimestamp(t *testing.T) {
-	client := new(Client)
+	client := new(BaseClient)
 
 	stamp := client.GetTimestamp()
 	assert.NotNil(t, stamp)
 }
 
 func Test_GetNonce(t *testing.T) {
-	client := new(Client)
+	client := new(BaseClient)
 
 	nonce := client.GetNonce()
 	assert.Equal(t, 32, len(nonce))
 }
 
 func Test_Json(t *testing.T) {
-	client := new(Client)
+	client := new(BaseClient)
 	httpresp := &http.Response{
 		Body: ioutil.NopCloser(strings.NewReader(`{"cleint":"test"}`)),
 	}
@@ -99,7 +89,7 @@ func Test_Json(t *testing.T) {
 }
 
 func Test_GetEndpoint(t *testing.T) {
-	client := new(Client)
+	client := new(BaseClient)
 	client.Endpoint = "client.aliyuncs.com"
 
 	endpoint := client.GetEndpoint("", "")
@@ -107,7 +97,7 @@ func Test_GetEndpoint(t *testing.T) {
 }
 
 func Test_HasError(t *testing.T) {
-	client := new(Client)
+	client := new(BaseClient)
 	iserror := client.HasError(nil)
 	assert.True(t, iserror)
 
@@ -123,7 +113,7 @@ func Test_HasError(t *testing.T) {
 }
 
 func Test_Default(t *testing.T) {
-	client := new(Client)
+	client := new(BaseClient)
 	str := client.Default(nil, "client")
 	assert.Equal(t, "client", str)
 

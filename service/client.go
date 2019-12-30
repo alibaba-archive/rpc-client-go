@@ -1,12 +1,9 @@
-package rpcclient
+package service
 
 import (
-	"crypto/hmac"
-	"crypto/sha1"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"net/url"
 	"reflect"
 	"runtime"
 	"strings"
@@ -18,7 +15,7 @@ import (
 )
 
 // client is for calling oss api
-type Client struct {
+type BaseClient struct {
 	RegionId       string `json:"RegionId" xml:"RegionId"`
 	Protocol       string `json:"Protocol" xml:"Protocol"`
 	Endpoint       string `json:"Endpoint" xml:"Endpoint"`
@@ -36,14 +33,14 @@ type Client struct {
 
 var defaultUserAgent = fmt.Sprintf("AlibabaCloud (%s; %s) Golang/%s Core/%s", runtime.GOOS, runtime.GOARCH, strings.Trim(runtime.Version(), "go"), "0.01")
 
-func (client *Client) InitWithConfig(config map[string]string) (err error) {
-	client.RegionId = config["regionId"]
-	client.Protocol = config["protocol"]
-	client.Endpoint = config["endpoint"]
+func (client *BaseClient) InitClient(config map[string]interface{}) (err error) {
+	client.RegionId = getStringValue(config["regionId"])
+	client.Protocol = getStringValue(config["protocol"])
+	client.Endpoint = getStringValue(config["endpoint"])
 	conf := &credentials.Configuration{
-		AccessKeyID:     config["accessKeyId"],
-		AccessKeySecret: config["accessKeySecret"],
-		Type:            config["type"],
+		AccessKeyID:     getStringValue(config["accessKeyId"]),
+		AccessKeySecret: getStringValue(config["accessKeySecret"]),
+		Type:            getStringValue(config["type"]),
 	}
 	if conf.Type == "" {
 		conf.Type = "access_key"
@@ -55,7 +52,7 @@ func (client *Client) InitWithConfig(config map[string]string) (err error) {
 	return nil
 }
 
-func (client *Client) GetUserAgent(useragent string) string {
+func (client *BaseClient) GetUserAgent(useragent string) string {
 	if useragent == "" {
 		return defaultUserAgent
 	}
@@ -63,48 +60,21 @@ func (client *Client) GetUserAgent(useragent string) string {
 }
 
 // Get Signature according to reqeust and bucketName
-func (client *Client) GetSignature(request *tea.Request, secret string) string {
+func (client *BaseClient) GetSignature(request *tea.Request, secret string) string {
 	stringToSign := buildRpcStringToSign(request)
 	signature := client.Sign(stringToSign, secret, "&")
 	return signature
 }
 
-func (client *Client) Sign(stringToSign, accessKeySecret, secretSuffix string) string {
+func (client *BaseClient) Sign(stringToSign, accessKeySecret, secretSuffix string) string {
 	secret := accessKeySecret + secretSuffix
 	signedBytes := shaHmac1(stringToSign, secret)
 	signedString := base64.StdEncoding.EncodeToString(signedBytes)
 	return signedString
 }
 
-func shaHmac1(source, secret string) []byte {
-	key := []byte(secret)
-	hmac := hmac.New(sha1.New, key)
-	hmac.Write([]byte(source))
-	return hmac.Sum(nil)
-}
-
-func buildRpcStringToSign(request *tea.Request) (stringToSign string) {
-	signParams := make(map[string]string)
-	for key, value := range request.Query {
-		signParams[key] = value
-	}
-
-	stringToSign = utils.GetUrlFormedMap(signParams)
-	stringToSign = strings.Replace(stringToSign, "+", "%20", -1)
-	stringToSign = strings.Replace(stringToSign, "*", "%2A", -1)
-	stringToSign = strings.Replace(stringToSign, "%7E", "~", -1)
-	stringToSign = url.QueryEscape(stringToSign)
-	stringToSign = request.Method + "&%2F&" + stringToSign
-	return
-}
-
-// Verify whether the parameters meet the requirements
-func (client *Client) Validator(params interface{}) error {
-	return nil
-}
-
 // If num is not 0, return num, or return defaultNum
-func (client *Client) DefaultNumber(num interface{}, defaultNum int) int {
+func (client *BaseClient) DefaultNumber(num interface{}, defaultNum int) int {
 	if num == nil {
 		return defaultNum
 	}
@@ -113,30 +83,31 @@ func (client *Client) DefaultNumber(num interface{}, defaultNum int) int {
 }
 
 // Parse filter to produce a map[string]string
-func (client *Client) Query(filter map[string]interface{}) map[string]string {
+func (client *BaseClient) Query(filter map[string]interface{}) map[string]string {
+	tmp := make(map[string]interface{})
+	byt, _ := json.Marshal(filter)
+	_ = json.Unmarshal(byt, &tmp)
+
 	result := make(map[string]string)
-	for key, value := range filter {
+	for key, value := range tmp {
 		filterValue := reflect.ValueOf(value)
-		err := flatRepeatedList(filterValue, result, key)
-		if err != nil {
-			return nil
-		}
+		flatRepeatedList(filterValue, result, key)
 	}
 
 	return result
 }
 
 // Get Date in GMT
-func (client *Client) GetTimestamp() string {
+func (client *BaseClient) GetTimestamp() string {
 	gmt := time.FixedZone("GMT", 0)
 	return time.Now().In(gmt).Format("2006-01-02T15:04:05Z")
 }
 
-func (client *Client) GetNonce() string {
+func (client *BaseClient) GetNonce() string {
 	return utils.GetUUID()
 }
 
-func (client *Client) Json(response *tea.Response) (result map[string]interface{}, err error) {
+func (client *BaseClient) Json(response *tea.Response) (result map[string]interface{}, err error) {
 	body, err := response.ReadBody()
 	if err != nil {
 		return
@@ -146,11 +117,11 @@ func (client *Client) Json(response *tea.Response) (result map[string]interface{
 	return
 }
 
-func (client *Client) GetEndpoint(product string, regionid string) string {
+func (client *BaseClient) GetEndpoint(product string, regionid string) string {
 	return client.Endpoint
 }
 
-func (client *Client) GetAccessKeyId() string {
+func (client *BaseClient) GetAccessKeyId() string {
 	if client.credential == nil {
 		return ""
 	}
@@ -161,7 +132,7 @@ func (client *Client) GetAccessKeyId() string {
 	return accesskey
 }
 
-func (client *Client) GetAccessKeySecret() string {
+func (client *BaseClient) GetAccessKeySecret() string {
 	if client.credential == nil {
 		return ""
 	}
@@ -173,7 +144,7 @@ func (client *Client) GetAccessKeySecret() string {
 }
 
 // Determine whether the request failed
-func (client *Client) HasError(body map[string]interface{}) bool {
+func (client *BaseClient) HasError(body map[string]interface{}) bool {
 	if body == nil {
 		return true
 	}
@@ -186,7 +157,7 @@ func (client *Client) HasError(body map[string]interface{}) bool {
 }
 
 // If realStr is not "", return realStr, or return defaultStr
-func (client *Client) Default(str interface{}, defaultStr string) string {
+func (client *BaseClient) Default(str interface{}, defaultStr string) string {
 	if str == nil {
 		return defaultStr
 	}
