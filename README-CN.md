@@ -31,3 +31,8 @@ $ dep ensure -add  github.com/aliyun/rpc-client-go
 
 ## 快速使用
 在您开始之前，您需要注册阿里云帐户并获取您的[凭证](https://usercenter.console.aliyun.com/#/manage/ak)。
+
+## 许可证
+[Apache-2.0](/LICENSE)
+
+Copyright (c) 2009-present, Alibaba Cloud All rights reserved.
