@@ -31,3 +31,8 @@ $ dep ensure -add  github.com/aliyun/rpc-client-go
 
 ## Quick Examples
 Before you begin, you need to sign up for an Alibaba Cloud account and retrieve your [Credentials](https://usercenter.console.aliyun.com/#/manage/ak).
+
+## License
+[Apache-2.0](/LICENSE)
+
+Copyright (c) 2009-present, Alibaba Cloud All rights reserved.
