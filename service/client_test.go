@@ -46,7 +46,7 @@ func Test_GetSignature(t *testing.T) {
 
 func Test_DefaultNumber(t *testing.T) {
 	client := new(BaseClient)
-	num := client.DefaultNumber(nil, 1)
+	num := client.DefaultNumber(0, 1)
 	assert.Equal(t, 1, num)
 
 	num = client.DefaultNumber(2, 1)
@@ -114,9 +114,9 @@ func Test_HasError(t *testing.T) {
 
 func Test_Default(t *testing.T) {
 	client := new(BaseClient)
-	str := client.Default(nil, "client")
+	str := client.Default("", "client")
 	assert.Equal(t, "client", str)
 
-	str = client.Default("", "client")
-	assert.Equal(t, "", str)
+	str = client.Default("ok", "client")
+	assert.Equal(t, "ok", str)
 }
