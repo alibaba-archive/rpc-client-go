@@ -74,12 +74,11 @@ func (client *BaseClient) Sign(stringToSign, accessKeySecret, secretSuffix strin
 }
 
 // If num is not 0, return num, or return defaultNum
-func (client *BaseClient) DefaultNumber(num interface{}, defaultNum int) int {
-	if num == nil {
+func (client *BaseClient) DefaultNumber(num int, defaultNum int) int {
+	if num == 0 {
 		return defaultNum
 	}
-	realnum := num.(int)
-	return realnum
+	return num
 }
 
 // Parse filter to produce a map[string]string
@@ -157,10 +156,9 @@ func (client *BaseClient) HasError(body map[string]interface{}) bool {
 }
 
 // If realStr is not "", return realStr, or return defaultStr
-func (client *BaseClient) Default(str interface{}, defaultStr string) string {
-	if str == nil {
+func (client *BaseClient) Default(str string, defaultStr string) string {
+	if str == "" {
 		return defaultStr
 	}
-	realstr := str.(string)
-	return realstr
+	return str
 }
