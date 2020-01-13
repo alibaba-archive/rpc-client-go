@@ -33,6 +33,8 @@ func Test_InitWithConfig(t *testing.T) {
 func Test_UserAgent(t *testing.T) {
 	client := new(BaseClient)
 	assert.Contains(t, client.GetUserAgent(""), "AlibabaCloud")
+
+	assert.Contains(t, client.GetUserAgent("rpc/test"), "rpc/test")
 }
 
 func Test_GetSignature(t *testing.T) {
@@ -119,4 +121,13 @@ func Test_Default(t *testing.T) {
 
 	str = client.Default("ok", "client")
 	assert.Equal(t, "ok", str)
+}
+
+func Test_NilCredential(t *testing.T) {
+	client := new(BaseClient)
+	accessKeyId := client.GetAccessKeyId()
+	assert.Equal(t, "", accessKeyId)
+
+	accessKeySecret := client.GetAccessKeySecret()
+	assert.Equal(t, "", accessKeySecret)
 }
