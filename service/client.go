@@ -136,7 +136,7 @@ func (client *BaseClient) GetAccessKeyId() string {
 	if client.credential == nil {
 		return ""
 	}
-	accesskey, err := client.credential.GetAccessKeyID()
+	accesskey, err := client.credential.GetAccessKeyId()
 	if err != nil {
 		return ""
 	}
@@ -147,7 +147,7 @@ func (client *BaseClient) GetAccessKeySecret() string {
 	if client.credential == nil {
 		return ""
 	}
-	accesssecret, err := client.credential.GetAccessSecret()
+	accesssecret, err := client.credential.GetAccessKeySecret()
 	if err != nil {
 		return ""
 	}
